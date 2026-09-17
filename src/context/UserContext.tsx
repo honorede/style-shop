@@ -1,70 +1,40 @@
+// src/context/UserContext.tsx
 import React, {createContext, ReactNode, useContext, useEffect, useState} from 'react';
 import {auth} from '../firebase/config';
-import {type User} from 'firebase/auth'; // ← ДОБАВЬ `type`
-import {getUserProfile, type UserProfile} from '../firebase/userService'; // ← ДОБАВЬ `type`
+import {onAuthStateChanged} from 'firebase/auth';
 
 interface UserContextType {
-    user: User | null;
-    profile: UserProfile | null;
+    user: any | null;
     loading: boolean;
-    isAdmin: boolean;
-    refreshProfile: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: ReactNode }> = ({children}) => {
-    const [user, setUser] = useState<User | null>(null);
-    const [profile, setProfile] = useState<UserProfile | null>(null);
+    const [user, setUser] = useState<any | null>(null);
     const [loading, setLoading] = useState(true);
 
-    const loadProfile = async (uid: string) => {
-        try {
-            const data = await getUserProfile(uid);
-            setProfile(data);
-        } catch (error) {
-            console.error('Ошибка загрузки профиля:', error);
-        }
-    };
-
     useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged(async (user) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
             setUser(user);
-            if (user) {
-                await loadProfile(user.uid);
-            } else {
-                setProfile(null);
-            }
             setLoading(false);
         });
         return () => unsubscribe();
     }, []);
 
-    const refreshProfile = async () => {
-        if (user) {
-            await loadProfile(user.uid);
-        }
-    };
-
-    const isAdmin = profile?.role === 'admin';
-
     return (
-        <UserContext.Provider value={{
-            user,
-            profile,
-            loading,
-            isAdmin,
-            refreshProfile,
-        }}>
+        <UserContext.Provider value={{user, loading}}>
             {children}
         </UserContext.Provider>
     );
 };
 
-export const useUser = () => {
+export const useAuth = () => {
     const context = useContext(UserContext);
-    if (!context) {
-        throw new Error('useUser must be used within a UserProvider');
+    if (context === undefined) {
+        throw new Error('useAuth must be used within a UserProvider');
     }
     return context;
 };
+
+export const useUser = useAuth;

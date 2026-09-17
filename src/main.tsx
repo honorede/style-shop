@@ -2,18 +2,18 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
-import {CartProvider} from './context/CartContext';
-import {UserProvider} from './context/UserContext';
 import {SettingsProvider} from './context/SettingsContext';
+import {UserProvider} from './context/UserContext';
+import {CartProvider} from './context/CartContext';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
-        <UserProvider>
-            <CartProvider>
-                <SettingsProvider>
+        <SettingsProvider>
+            <UserProvider>
+                <CartProvider>
                     <App/>
-                </SettingsProvider>
-            </CartProvider>
-        </UserProvider>
+                </CartProvider>
+            </UserProvider>
+        </SettingsProvider>
     </React.StrictMode>
 );

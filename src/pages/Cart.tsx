@@ -1,7 +1,9 @@
 import React, {useEffect} from 'react';
+import {useNavigate} from 'react-router-dom';
 import {useCart} from '../context/CartContext';
 
 const Cart: React.FC = () => {
+    const navigate = useNavigate();
     const {
         cartItems,
         removeFromCart,
@@ -21,6 +23,14 @@ const Cart: React.FC = () => {
 
     const getProduct = (productId: string) => {
         return products?.find(p => p.id === productId);
+    };
+
+    const handleCheckout = () => {
+        if (cartItems.length === 0) {
+            alert('Корзина пуста!');
+            return;
+        }
+        navigate('/checkout');
     };
 
     if (loading) {
@@ -98,7 +108,12 @@ const Cart: React.FC = () => {
                         <button onClick={clearCart} className="btn-secondary flex-1 text-center text-sm py-2">🗑️
                             Очистить
                         </button>
-                        <button className="btn-primary flex-1 text-center text-sm py-2">Оформить заказ →</button>
+                        <button
+                            onClick={handleCheckout}
+                            className="btn-primary flex-1 text-center text-sm py-2"
+                        >
+                            Оформить заказ →
+                        </button>
                     </div>
                 </div>
             )}

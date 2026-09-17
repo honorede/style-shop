@@ -1,3 +1,4 @@
+// src/pages/Admin.tsx
 import React, {useEffect, useState} from 'react';
 import {useCart} from '../context/CartContext';
 import {useUser} from '../context/UserContext';
@@ -9,7 +10,7 @@ import {generateProducts, PRESET_COUNTS} from '../utils/productGenerator';
 type TabType = 'products' | 'users' | 'stats' | 'settings';
 
 const Admin: React.FC = () => {
-    const {user, isAdmin, loading: userLoading} = useUser();
+    const {user} = useUser();
     const {products, addProduct, updateProduct, deleteProduct, loadProducts, loading} = useCart();
     const {settings, updateSettings, refresh: refreshSettings} = useSettings();
 
@@ -19,7 +20,6 @@ const Admin: React.FC = () => {
     const [generating, setGenerating] = useState(false);
     const [selectedCount, setSelectedCount] = useState(10);
 
-    // Форма для товаров
     const [form, setForm] = useState({
         name: '',
         price: '',
@@ -30,9 +30,7 @@ const Admin: React.FC = () => {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [formLoading, setFormLoading] = useState(false);
 
-    // Загрузка пользователей
     const loadUsers = async () => {
-        if (!isAdmin) return;
         setLoadingUsers(true);
         try {
             const data = await getAllUsers();
@@ -45,18 +43,14 @@ const Admin: React.FC = () => {
         }
     };
 
-    // Загрузка данных при монтировании
     useEffect(() => {
-        if (isAdmin) {
-            loadProducts();
-            loadUsers();
-        }
-    }, [isAdmin]);
+        loadProducts();
+        loadUsers();
+    }, []);
 
-    // ============ ГЕНЕРАТОР ТОВАРОВ ============
+    // ============ ГЕНЕРАТОР ============
     const handleGenerateProducts = async () => {
-        if (!confirm(`Сгенерировать ${selectedCount} товаров? Это добавит их в каталог.`)) return;
-
+        if (!confirm(`Сгенерировать ${selectedCount} товаров?`)) return;
         setGenerating(true);
         try {
             const newProducts = generateProducts(selectedCount);
@@ -77,7 +71,6 @@ const Admin: React.FC = () => {
     const handleProductSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setFormLoading(true);
-
         try {
             const productData = {
                 name: form.name,
@@ -137,7 +130,6 @@ const Admin: React.FC = () => {
         totalAdmins: users?.filter(u => u.role === 'admin').length || 0,
     };
 
-    // ============ НАЗВАНИЯ СТРАНИЦ ============
     const pageLabels: Record<string, string> = {
         home: '🏠 Главная',
         catalog: '🛍️ Каталог',
@@ -148,47 +140,14 @@ const Admin: React.FC = () => {
         register: '📝 Регистрация',
     };
 
-    // Проверка доступа
-    if (userLoading) {
-        return (
-            <div className="container-custom py-8">
-                <h1 className="heading-1 mb-8">⚙️ Админ-панель</h1>
-                <div className="card text-center py-12">
-                    <p className="text-body">Загрузка...</p>
-                </div>
-            </div>
-        );
-    }
-
-    if (!user) {
-        return (
-            <div className="container-custom py-8">
-                <h1 className="heading-1 mb-8">⚙️ Админ-панель</h1>
-                <div className="card text-center py-12">
-                    <p className="text-body text-xl">⚠️ Требуется авторизация</p>
-                    <p className="text-muted mt-2">Войдите в аккаунт администратора</p>
-                </div>
-            </div>
-        );
-    }
-
-    if (!isAdmin) {
-        return (
-            <div className="container-custom py-8">
-                <h1 className="heading-1 mb-8">⚙️ Админ-панель</h1>
-                <div className="card text-center py-12">
-                    <p className="text-body text-xl">⛔ Доступ запрещён</p>
-                    <p className="text-muted mt-2">У вас нет прав администратора</p>
-                </div>
-            </div>
-        );
-    }
+    // ⚠️ НЕТ ПРОВЕРОК! Просто рендерим админку.
+    // Если ты здесь — значит App.tsx пропустил тебя как админа.
 
     return (
         <div className="container-custom py-8 animate-fade-in">
             <div className="flex justify-between items-center mb-8">
                 <h1 className="heading-1">⚙️ Админ-панель</h1>
-                <span className="text-sm text-gray-400">Администратор: {user.email}</span>
+                <span className="text-sm text-gray-400">Администратор: {user?.email || 'Unknown'}</span>
             </div>
 
             {/* Табы */}
@@ -229,10 +188,8 @@ const Admin: React.FC = () => {
 
             {/* ============================================================ */}
             {/* ВКЛАДКА: ТОВАРЫ */}
-            {/* ============================================================ */}
             {activeTab === 'products' && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Форма добавления товара */}
                     <div className="card lg:col-span-1">
                         <h2 className="heading-2 mb-6">
                             {editingId ? '✏️ Редактировать' : '➕ Добавить товар'}
@@ -318,13 +275,11 @@ const Admin: React.FC = () => {
                         </form>
                     </div>
 
-                    {/* Список товаров + Генератор */}
                     <div className="lg:col-span-2">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="heading-2">📦 Все товары ({products?.length || 0})</h2>
                         </div>
 
-                        {/* ===== ГЕНЕРАТОР ТОВАРОВ ===== */}
                         <div className="mb-6 p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl">
                             <div className="flex flex-wrap items-center justify-between gap-3">
                                 <div>
@@ -360,7 +315,6 @@ const Admin: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Список товаров */}
                         {loading ? (
                             <p className="text-gray-400">Загрузка...</p>
                         ) : !products || products.length === 0 ? (
@@ -405,7 +359,6 @@ const Admin: React.FC = () => {
 
             {/* ============================================================ */}
             {/* ВКЛАДКА: ПОЛЬЗОВАТЕЛИ */}
-            {/* ============================================================ */}
             {activeTab === 'users' && (
                 <div className="card overflow-x-auto">
                     <div className="flex justify-between items-center mb-4">
@@ -459,7 +412,6 @@ const Admin: React.FC = () => {
 
             {/* ============================================================ */}
             {/* ВКЛАДКА: СТАТИСТИКА */}
-            {/* ============================================================ */}
             {activeTab === 'stats' && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="card text-center">
@@ -484,7 +436,6 @@ const Admin: React.FC = () => {
 
             {/* ============================================================ */}
             {/* ВКЛАДКА: НАСТРОЙКИ */}
-            {/* ============================================================ */}
             {activeTab === 'settings' && (
                 <div className="card">
                     <h2 className="heading-2 mb-4">⚙️ Настройки навигации</h2>
