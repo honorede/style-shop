@@ -4,13 +4,13 @@ import {getAuth} from 'firebase/auth';
 
 // ТВОЙ КОНФИГ ИЗ FIREBASE CONSOLE
 const firebaseConfig = {
-    apiKey: "AIzaSyCGrRY-AZ86XWzd3NW00w3Qmzgbxqrwy2U",
-    authDomain: "the-shop-3e884.firebaseapp.com",
-    projectId: "the-shop-3e884",
-    storageBucket: "the-shop-3e884.firebasestorage.app",
-    messagingSenderId: "280615723199",
-    appId: "1:280615723199:web:e6528ab912fdffb1a7660a",
-    measurementId: "G-6S9B99KXRY"
+    apiKey: "показать не могу",
+    authDomain: "показать не могу",
+    projectId: "показать не могу",
+    storageBucket: "показать не могу",
+    messagingSenderId: "показать не могу",
+    appId: "показать не могу",
+    measurementId: "показать не могу"
 };
 
 // Инициализация Firebase
